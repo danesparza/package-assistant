@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -68,6 +69,8 @@ func initConfig() {
 	viper.SetDefault("server.allowed-origins", "*")
 	viper.SetDefault("logger.level", "info")
 	viper.SetDefault("logger.format", "json")
+	viper.SetDefault("upload.path", path.Join(home, "package-assistant", "uploads"))
+	viper.SetDefault("upload.bytelimit", 30*1024*1024) // 30MB
 
 	// If a config file is found, read it in
 	_ = viper.ReadInConfig()
