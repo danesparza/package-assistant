@@ -1,1 +1,1 @@
-# package-assistant
+# package-assistant [![Build and release](https://github.com/danesparza/package-assistant/actions/workflows/release.yaml/badge.svg)](https://github.com/danesparza/package-assistant/actions/workflows/release.yaml)
