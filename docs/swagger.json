@@ -1,11 +1,19 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "package-repo helper REST service",
+        "title": "package-assistant",
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
+    "basePath": "/v1",
     "paths": {
         "/package": {
-            "put": {
+            "post": {
                 "description": "Upload package",
                 "consumes": [
                     "multipart/form-data"

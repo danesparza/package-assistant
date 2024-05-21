@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package main
 
 import (
@@ -12,6 +9,15 @@ import (
 	"strings"
 	"time"
 )
+
+// @title package-assistant
+// @version 1.0
+// @description package-repo helper REST service
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @BasePath /v1
 
 func main() {
 	//	Set log info:

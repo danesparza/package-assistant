@@ -21,7 +21,7 @@ import (
 // @Failure 400 {object} api.ErrorResponse
 // @Failure 413 {object} api.ErrorResponse
 // @Failure 500 {object} api.ErrorResponse
-// @Router /package [put]
+// @Router /package [post]
 func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) {
 
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
@@ -30,7 +30,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	//	First check for maximum uplooad size and return an error if we exceed it.
 	req.Body = http.MaxBytesReader(rw, req.Body, MAX_UPLOAD_SIZE)
 	if err := req.ParseMultipartForm(MAX_UPLOAD_SIZE); err != nil {
-		err = fmt.Errorf("could not parse multipart form: %v", err)
+		err = fmt.Errorf("uploaded file is too big: %w", err)
 		sendErrorResponse(rw, err, http.StatusRequestEntityTooLarge)
 		return
 	}
@@ -40,7 +40,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	// the Header and the size of the file
 	file, fileHeader, err := req.FormFile("file")
 	if err != nil {
-		err = fmt.Errorf("error retrieving file: %v", err)
+		err = fmt.Errorf("error retrieving file from the 'file' form element: %w", err)
 		sendErrorResponse(rw, err, http.StatusBadRequest)
 		return
 	}
@@ -50,7 +50,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	// already exist
 	err = os.MkdirAll(UploadPath, os.ModePerm)
 	if err != nil {
-		err = fmt.Errorf("error creating uploads path: %v", err)
+		err = fmt.Errorf("error creating uploads path: %w", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +59,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	destinationFile := path.Join(UploadPath, fileHeader.Filename)
 	dst, err := os.Create(destinationFile)
 	if err != nil {
-		err = fmt.Errorf("error creating file: %v", err)
+		err = fmt.Errorf("error creating file: %w", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
@@ -69,7 +69,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	// at the specified destination
 	_, err = io.Copy(dst, file)
 	if err != nil {
-		err = fmt.Errorf("error saving file: %v", err)
+		err = fmt.Errorf("error saving file: %w", err)
 		sendErrorResponse(rw, err, http.StatusInternalServerError)
 		return
 	}
@@ -78,7 +78,7 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
-		Message: "File uploaded",
+		Message: fmt.Sprintf("File uploaded: %v", fileHeader.Filename),
 	}
 
 	//	Serialize to JSON & return the response:
