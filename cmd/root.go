@@ -71,6 +71,8 @@ func initConfig() {
 	viper.SetDefault("logger.format", "json")
 	viper.SetDefault("upload.path", path.Join(home, "package-assistant", "uploads"))
 	viper.SetDefault("upload.bytelimit", 30*1024*1024) // 30MB
+	viper.SetDefault("github.projecturl", "https://github.com/danesparza/package-repo")
+	viper.SetDefault("github.projectfolder", "/data/work/package-repo")
 
 	// If a config file is found, read it in
 	_ = viper.ReadInConfig()

@@ -30,10 +30,12 @@ RUN echo $circleSha
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-X ${packagePath}/version.BuildNumber=${buildNum} -X ${packagePath}/version.CommitID=${circleSha} -X '${packagePath}/version.Prerelease=-'" -installsuffix cgo -o main ./
 
 ######## Start a new stage from scratch #######
-FROM alpine:latest
+FROM ubuntu:23.10
 
-RUN apk --no-cache add ca-certificates
-RUN apk --no-cache add tzdata
+# Specialized tools for package-repo
+RUN apt update
+RUN apt upgrade
+RUN apt install gnupg dpkg-dev apt-utils nano
 
 WORKDIR /root/
 

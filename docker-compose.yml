@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  package-repo:
+    image: danesparza/package-assistant:1.1.6
+    container_name: package-assist
+    tty: true
+    restart: unless-stopped
+    environment:
+      - PACKASSIST_UPLOAD_PATH=/data/package-assist
+      - PACKASSIST_GITHUB_PROJECTFOLDER=/data/package-repo
+    volumes: # Change the first part of the path to match the environment
+      - /Users/danesparza/package-assistant:/data/
