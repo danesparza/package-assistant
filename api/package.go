@@ -79,6 +79,14 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	//  cd /data
 	//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
 
+	//	Switch to the project directory
+	//  Use git config credential.helper:
+	//  git config credential.helper '!f() { sleep 1; echo "username=${PACKASSIST_GITHUB_USER}"; echo "password=${PACKASSIST_GITHUB_PASSWORD}"; }; f'
+
+	//	Make sure to set an identity:
+	//	git config --global user.email "danesparza@cagedtornado.com"
+	//	git config --global user.name "Package repo bot"
+
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{
 		Message: fmt.Sprintf("File uploaded: %v", fileHeader.Filename),
