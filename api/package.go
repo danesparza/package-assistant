@@ -75,6 +75,9 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	//	Process the file ... ?
+	//	Does the git repo exist? If not, clone it (it's big!):
+	//  cd /data
+	//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{

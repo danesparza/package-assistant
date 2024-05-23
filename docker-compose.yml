@@ -2,12 +2,17 @@ version: '3.4'
 
 services:
   package-repo:
-    image: danesparza/package-assistant:1.1.8
+    image: danesparza/package-assistant:1.1.9
     container_name: package-assist
     tty: true
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      - PACKASSIST_UPLOAD_PATH=/data/package-assist
-      - PACKASSIST_GITHUB_PROJECTFOLDER=/data/package-repo
+      - PACKASSIST_UPLOAD_PATH=${PACKASSIST_UPLOAD_PATH}
+      - PACKASSIST_GITHUB_PROJECTFOLDER=${PACKASSIST_GITHUB_PROJECTFOLDER}
+      - PACKASSIST_GITHUB_PROJECTURL=${PACKASSIST_GITHUB_PROJECTURL}
+      - PACKASSIST_GITHUB_USER=${PACKASSIST_GITHUB_USER}
+      - PACKASSIST_GITHUB_PASSWORD=${PACKASSIST_GITHUB_PASSWORD}
     volumes: # Change the first part of the path to match the environment
       - /Users/danesparza/package-assistant:/data/
