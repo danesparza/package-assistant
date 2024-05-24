@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/package-assistant/api"
 	_ "github.com/danesparza/package-assistant/docs" // swagger docs location
+	"github.com/danesparza/package-assistant/internal/git"
 	"github.com/danesparza/package-assistant/internal/telemetry"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -43,14 +44,31 @@ func start(cmd *cobra.Command, args []string) {
 	loglevel := viper.GetString("logger.level")
 
 	//	Emit what we know:
-	log.Info().Str("loglevel", loglevel).Msg("Starting up")
+	log.Info().
+		Str("loglevel", loglevel).
+		Str("upload.path", viper.GetString("upload.path")).
+		Str("upload.bytelimit", viper.GetString("upload.bytelimit")).
+		Str("github.projecturl", viper.GetString("github.projecturl")).
+		Str("github.basefolder", viper.GetString("github.basefolder")).
+		Str("github.projectfolder", viper.GetString("github.projectfolder")).
+		Str("github.user", viper.GetString("github.user")).
+		Msg("Starting up")
+
+	// Service initialization
+	err := git.InitPackageRepo(
+		viper.GetString("github.projecturl"),
+		viper.GetString("github.basefolder"),
+		viper.GetString("github.projectfolder"),
+	)
+	if err != nil {
+		log.Err(err).Msg("problem initializing git repo")
+		return
+	}
 
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
 	}
-
-	// Service initialization
 
 	//	Trap program exit appropriately
 	ctx, cancel := context.WithCancel(context.Background())

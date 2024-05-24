@@ -1,5 +1,9 @@
 package git
 
+import (
+	"os"
+)
+
 type gitRepoService struct {
 	ProjectURL    string
 	ProjectFolder string
@@ -37,8 +41,11 @@ func NewGitRepoService(projectURL, projectFolder string) GitRepoService {
 // and that the git credential helper is set up and ready to use
 func InitPackageRepo(projectUrl, baseFolder, projectFolder string) error {
 	//	Does the git repo exist? If not, clone it (it's big!):
-	//  cd /data (baseFolder)
-	//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
+	_, err := os.Stat(projectFolder)
+	if os.IsNotExist(err) {
+		//  cd /data (baseFolder)
+		//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
+	}
 
 	//	Switch to the project directory (projectFolder):
 	//	cd /data/package-assistant
