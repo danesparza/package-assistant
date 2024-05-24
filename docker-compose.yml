@@ -14,5 +14,7 @@ services:
       - PACKASSIST_GITHUB_PROJECTURL=${PACKASSIST_GITHUB_PROJECTURL}
       - PACKASSIST_GITHUB_USER=${PACKASSIST_GITHUB_USER}
       - PACKASSIST_GITHUB_PASSWORD=${PACKASSIST_GITHUB_PASSWORD}
+      - PACKASSIST_GITHUB_GPGKEY
+      - PACKASSIST_GITHUB_GPGPASSWORD
     volumes: # Change the first part of the path to match the environment
       - /Users/danesparza/package-assistant:/data/

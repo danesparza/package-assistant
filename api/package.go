@@ -75,20 +75,14 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	}
 
 	//	Process the file
-	//	Does the git repo exist? If not, clone it (it's big!):
-	//  cd /data
-	//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
 
-	//	Switch to the project directory:
-	//	cd /data/package-assistant
+	//	ci-pre.sh (switch to repo folder and git pull)
 
-	//  Use git config credential.helper:
-	//  git config credential.helper '!f() { sleep 1; echo "username=${PACKASSIST_GITHUB_USER}"; echo "password=${PACKASSIST_GITHUB_PASSWORD}"; }; f'
+	//	Copy file to repo folder
 
-	//	Make sure to set an identity:
-	//	git config --global user.email "danesparza@cagedtornado.com"
-	//	git config --global user.name "Package repo bot"
-	//	Now you should be able to git add . / git commit -m "Some message"
+	//  ci-refresh.sh / refresh-packages.sh (Perform dpkg-scanpackages, gzip and sign using gpg)
+
+	//	ci-post.sh (git add / git commit / git push)
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{

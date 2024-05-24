@@ -50,6 +50,30 @@ func start(cmd *cobra.Command, args []string) {
 		StartTime: time.Now(),
 	}
 
+	// Service initialization
+
+	//	Does the gpg key exist? This should return stuff
+	//	gpg -K
+
+	//	If not, Import the GPG key from environment variables
+	//	Note: PACKASSIST_GITHUB_GPGKEY is base64 encoded and in a single line
+	// echo -n "$PACKASSIST_GITHUB_GPGKEY" | base64 --decode | gpg --batch --no-tty --passphrase ${PACKASSIST_GITHUB_GPGPASSWORD} --import
+
+	//	Does the git repo exist? If not, clone it (it's big!):
+	//  cd /data
+	//  git clone ${PACKASSIST_GITHUB_PROJECTURL}
+
+	//	Switch to the project directory:
+	//	cd /data/package-assistant
+
+	//  Use git config credential.helper:
+	//  git config credential.helper '!f() { sleep 1; echo "username=${PACKASSIST_GITHUB_USER}"; echo "password=${PACKASSIST_GITHUB_PASSWORD}"; }; f'
+
+	//	Make sure to set an identity:
+	//	git config --global user.email "danesparza@cagedtornado.com"
+	//	git config --global user.name "Package repo bot"
+	//	Now you should be able to git add . / git commit -m "Some message" / git push
+
 	//	Trap program exit appropriately
 	ctx, cancel := context.WithCancel(context.Background())
 	sigs := make(chan os.Signal, 2)
