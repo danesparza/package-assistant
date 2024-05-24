@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/package-assistant/api"
 	_ "github.com/danesparza/package-assistant/docs" // swagger docs location
-	"github.com/danesparza/package-assistant/internal/git"
+	"github.com/danesparza/package-assistant/internal/repo"
 	"github.com/danesparza/package-assistant/internal/telemetry"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -43,6 +43,12 @@ func start(cmd *cobra.Command, args []string) {
 
 	loglevel := viper.GetString("logger.level")
 
+	//	Trap program exit appropriately
+	ctx, cancel := context.WithCancel(context.Background())
+	sigs := make(chan os.Signal, 2)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	go handleSignals(ctx, sigs, cancel)
+
 	//	Emit what we know:
 	log.Info().
 		Str("loglevel", loglevel).
@@ -55,10 +61,12 @@ func start(cmd *cobra.Command, args []string) {
 		Msg("Starting up")
 
 	// Service initialization
-	err := git.InitPackageRepo(
+	err := repo.InitPackageRepo(ctx,
 		viper.GetString("github.projecturl"),
 		viper.GetString("github.basefolder"),
 		viper.GetString("github.projectfolder"),
+		viper.GetString("github.user"),
+		viper.GetString("github.password"),
 	)
 	if err != nil {
 		log.Err(err).Msg("problem initializing git repo")
@@ -69,12 +77,6 @@ func start(cmd *cobra.Command, args []string) {
 	apiService := api.Service{
 		StartTime: time.Now(),
 	}
-
-	//	Trap program exit appropriately
-	ctx, cancel := context.WithCancel(context.Background())
-	sigs := make(chan os.Signal, 2)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-	go handleSignals(ctx, sigs, cancel)
 
 	//	Create a router and set up our REST endpoints...
 	r := chi.NewRouter()
