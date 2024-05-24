@@ -61,7 +61,7 @@ func start(cmd *cobra.Command, args []string) {
 		Msg("Starting up")
 
 	// Service initialization
-	err := repo.InitPackageRepo(ctx,
+	gitRepo, err := repo.InitPackageRepo(ctx,
 		viper.GetString("github.projecturl"),
 		viper.GetString("github.basefolder"),
 		viper.GetString("github.projectfolder"),
@@ -76,6 +76,7 @@ func start(cmd *cobra.Command, args []string) {
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
+		Repo:      gitRepo,
 	}
 
 	//	Create a router and set up our REST endpoints...

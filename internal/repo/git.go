@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/rs/zerolog/log"
@@ -43,10 +44,11 @@ func NewGitRepoService(projectURL, projectFolder string) GitRepoService {
 
 // InitPackageRepo makes sure that the package repo project folder is ready to use
 // and that the git credential helper is set up and ready to use
-func InitPackageRepo(ctx context.Context, projectUrl, baseFolder, projectFolder, username, password string) error {
-	//	Does the git repo exist? If not, clone it (it's big!):
+func InitPackageRepo(ctx context.Context, projectUrl, baseFolder, projectFolder, username, password string) (*git.Repository, error) {
+	log.Info().Msg("Initializing package repo...")
 	_, err := os.Stat(projectFolder)
 	if os.IsNotExist(err) {
+		log.Info().Msg("project folder does not exist.  Git cloning ... ")
 		_, err := git.PlainCloneContext(ctx, projectFolder, false, &git.CloneOptions{
 			// The intended use of a GitHub personal access token is in replace of your password
 			// because access tokens can easily be revoked.
@@ -60,21 +62,21 @@ func InitPackageRepo(ctx context.Context, projectUrl, baseFolder, projectFolder,
 		})
 
 		if err != nil {
-			log.Err(err).Msg("problem cloning repo")
+			log.Err(err).
+				Str("projectFolder", projectFolder).
+				Str("projectUrl", projectUrl).
+				Msg("problem cloning repo")
+			return nil, fmt.Errorf("problem cloning repo: %w", err)
 		}
 	}
 
-	//r, err := git.PlainOpen(projectFolder)
+	r, err := git.PlainOpen(projectFolder)
+	if err != nil {
+		log.Err(err).
+			Str("projectFolder", projectFolder).
+			Msg("problem opening repo")
+		return nil, fmt.Errorf("problem opening repo: %w", err)
+	}
 
-	//	Switch to the project directory (projectFolder):
-	//	cd /data/package-assistant
-
-	//  Use git config credential.helper:
-	//  git config credential.helper '!f() { sleep 1; echo "username=${PACKASSIST_GITHUB_USER}"; echo "password=${PACKASSIST_GITHUB_PASSWORD}"; }; f'
-
-	//	Make sure to set an identity:
-	//	git config --global user.email "danesparza@cagedtornado.com"
-	//	git config --global user.name "Package repo bot"
-	//	Now you should be able to git add . / git commit -m "Some message" / git push
-	return nil
+	return r, nil
 }

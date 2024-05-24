@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/danesparza/package-assistant/version"
+	"github.com/go-git/go-git/v5"
 	"net/http"
 	"time"
 )
@@ -10,6 +11,7 @@ import (
 // Service encapsulates API service operations
 type Service struct {
 	StartTime time.Time
+	Repo      *git.Repository
 }
 
 // SystemResponse is a response for a system request
