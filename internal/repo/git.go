@@ -8,6 +8,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 	"os"
 	"path"
 	"path/filepath"
@@ -123,11 +124,15 @@ func (g gitRepoService) CommitAndPush() error {
 		return fmt.Errorf("problem getting working tree when committing: %w", err)
 	}
 
+	//	Get the name / email from config (or environment)
+	gitName := viper.GetString("git.name")
+	gitEmail := viper.GetString("git.email")
+
 	//	Commit the file(s)
 	_, err = w.Commit("package repo bot commit", &git.CommitOptions{
 		Author: &object.Signature{
-			Name:  "John Doe",
-			Email: "john@doe.org",
+			Name:  gitName,
+			Email: gitEmail,
 			When:  time.Now(),
 		},
 	})
