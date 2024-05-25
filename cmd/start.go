@@ -57,6 +57,9 @@ func start(cmd *cobra.Command, args []string) {
 		Str("github.projecturl", viper.GetString("github.projecturl")).
 		Str("github.projectfolder", viper.GetString("github.projectfolder")).
 		Str("github.user", viper.GetString("github.user")).
+		Str("github.password", "********").
+		Str("git.name", viper.GetString("git.name")).
+		Str("git.email", viper.GetString("git.email")).
 		Msg("Starting up")
 
 	// Service initialization

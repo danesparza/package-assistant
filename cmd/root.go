@@ -75,6 +75,8 @@ func initConfig() {
 	viper.SetDefault("github.projectfolder", "/data/package-repo")
 	viper.SetDefault("github.user", "someuser")
 	viper.SetDefault("github.password", "sometoken")
+	viper.SetDefault("git.name", "some name")
+	viper.SetDefault("git.email", "some@changethis.com")
 
 	// If a config file is found, read it in
 	_ = viper.ReadInConfig()
