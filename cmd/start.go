@@ -55,7 +55,6 @@ func start(cmd *cobra.Command, args []string) {
 		Str("upload.path", viper.GetString("upload.path")).
 		Str("upload.bytelimit", viper.GetString("upload.bytelimit")).
 		Str("github.projecturl", viper.GetString("github.projecturl")).
-		Str("github.basefolder", viper.GetString("github.basefolder")).
 		Str("github.projectfolder", viper.GetString("github.projectfolder")).
 		Str("github.user", viper.GetString("github.user")).
 		Msg("Starting up")
@@ -63,7 +62,6 @@ func start(cmd *cobra.Command, args []string) {
 	// Service initialization
 	gitRepo, err := repo.InitPackageRepo(ctx,
 		viper.GetString("github.projecturl"),
-		viper.GetString("github.basefolder"),
 		viper.GetString("github.projectfolder"),
 		viper.GetString("github.user"),
 		viper.GetString("github.password"),

@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/danesparza/package-assistant/internal/files"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/rs/zerolog/log"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 type gitRepoService struct {
@@ -34,7 +36,7 @@ func NewGitRepoService(projectURL, projectFolder string, gitrepo *git.Repository
 
 // InitPackageRepo makes sure that the package repo project folder is ready to use
 // and that the git credential helper is set up and ready to use
-func InitPackageRepo(ctx context.Context, projectUrl, baseFolder, projectFolder, username, password string) (*git.Repository, error) {
+func InitPackageRepo(ctx context.Context, projectUrl, projectFolder, username, password string) (*git.Repository, error) {
 	log.Info().Msg("Initializing package repo...")
 	_, err := os.Stat(projectFolder)
 	if os.IsNotExist(err) {
@@ -113,7 +115,31 @@ func (g gitRepoService) AddFile(srcFile string) error {
 	return nil
 }
 
+// CommitAndPush commits the changes and pushes to the remote
 func (g gitRepoService) CommitAndPush() error {
-	//TODO implement me
-	panic("implement me")
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when committing: %w", err)
+	}
+
+	//	Commit the file(s)
+	_, err = w.Commit("package repo bot commit", &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  "John Doe",
+			Email: "john@doe.org",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("problem committing: %w", err)
+	}
+
+	//	Push
+	err = g.Repository.Push(&git.PushOptions{})
+	if err != nil {
+		return fmt.Errorf("problem pushing: %w", err)
+	}
+
+	return nil
 }

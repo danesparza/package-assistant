@@ -72,7 +72,6 @@ func initConfig() {
 	viper.SetDefault("upload.path", path.Join(home, "package-assistant", "uploads"))
 	viper.SetDefault("upload.bytelimit", 30*1024*1024) // 30MB
 	viper.SetDefault("github.projecturl", "https://github.com/some/package-repo")
-	viper.SetDefault("github.basefolder", "/data")
 	viper.SetDefault("github.projectfolder", "/data/package-repo")
 	viper.SetDefault("github.user", "someuser")
 	viper.SetDefault("github.password", "sometoken")
