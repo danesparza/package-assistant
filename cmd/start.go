@@ -76,7 +76,10 @@ func start(cmd *cobra.Command, args []string) {
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
-		Repo:      gitRepo,
+		RepoSvc: repo.NewGitRepoService(
+			viper.GetString("github.projecturl"),
+			viper.GetString("github.projectfolder"),
+			gitRepo),
 	}
 
 	//	Create a router and set up our REST endpoints...

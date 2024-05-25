@@ -12,16 +12,43 @@ import (
 type gitRepoService struct {
 	ProjectURL    string
 	ProjectFolder string
+	*git.Repository
 }
 
+// Pull pulls (syncs) upstream changes into the local repo
 func (g gitRepoService) Pull() error {
-	//TODO implement me
-	panic("implement me")
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when pulling: %w", err)
+	}
+
+	//	Pull
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if err != nil {
+		return fmt.Errorf("problem pulling repository: %w", err)
+	}
+
+	return nil
 }
 
+// AddFile add the file to the repository
 func (g gitRepoService) AddFile(srcFile string) error {
-	//TODO implement me
-	panic("implement me")
+	//	TODO: Do I need to copy the file to the project folder?
+
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when adding: %w", err)
+	}
+
+	//	Add the file
+	_, err = w.Add(srcFile)
+	if err != nil {
+		return fmt.Errorf("problem adding the file: %w", err)
+	}
+
+	return nil
 }
 
 func (g gitRepoService) CommitAndPush() error {
@@ -35,10 +62,11 @@ type GitRepoService interface {
 	CommitAndPush() error
 }
 
-func NewGitRepoService(projectURL, projectFolder string) GitRepoService {
+func NewGitRepoService(projectURL, projectFolder string, gitrepo *git.Repository) GitRepoService {
 	return &gitRepoService{
 		ProjectURL:    projectURL,
 		ProjectFolder: projectFolder,
+		Repository:    gitrepo,
 	}
 }
 
