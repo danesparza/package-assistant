@@ -24,6 +24,7 @@ type gitRepoService struct {
 type GitRepoService interface {
 	Pull() error
 	AddFile(srcFile string) error
+	AddAll() error
 	CommitAndPush() error
 }
 
@@ -111,6 +112,25 @@ func (g gitRepoService) AddFile(srcFile string) error {
 	_, err = w.Add(srcFile)
 	if err != nil {
 		return fmt.Errorf("problem adding the file: %w", err)
+	}
+
+	return nil
+}
+
+// AddAll adds all changed files in the repo to the commit
+func (g gitRepoService) AddAll() error {
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when adding all: %w", err)
+	}
+
+	//	Add the file
+	err = w.AddWithOptions(&git.AddOptions{
+		All: true,
+	})
+	if err != nil {
+		return fmt.Errorf("problem adding all: %w", err)
 	}
 
 	return nil
