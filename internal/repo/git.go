@@ -3,57 +3,19 @@ package repo
 import (
 	"context"
 	"fmt"
+	"github.com/danesparza/package-assistant/internal/files"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/rs/zerolog/log"
 	"os"
+	"path"
+	"path/filepath"
 )
 
 type gitRepoService struct {
 	ProjectURL    string
 	ProjectFolder string
 	*git.Repository
-}
-
-// Pull pulls (syncs) upstream changes into the local repo
-func (g gitRepoService) Pull() error {
-	// Get the working directory for the repository
-	w, err := g.Repository.Worktree()
-	if err != nil {
-		return fmt.Errorf("problem getting working tree when pulling: %w", err)
-	}
-
-	//	Pull
-	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
-	if err != nil {
-		return fmt.Errorf("problem pulling repository: %w", err)
-	}
-
-	return nil
-}
-
-// AddFile add the file to the repository
-func (g gitRepoService) AddFile(srcFile string) error {
-	//	TODO: Do I need to copy the file to the project folder?
-
-	// Get the working directory for the repository
-	w, err := g.Repository.Worktree()
-	if err != nil {
-		return fmt.Errorf("problem getting working tree when adding: %w", err)
-	}
-
-	//	Add the file
-	_, err = w.Add(srcFile)
-	if err != nil {
-		return fmt.Errorf("problem adding the file: %w", err)
-	}
-
-	return nil
-}
-
-func (g gitRepoService) CommitAndPush() error {
-	//TODO implement me
-	panic("implement me")
 }
 
 type GitRepoService interface {
@@ -107,4 +69,51 @@ func InitPackageRepo(ctx context.Context, projectUrl, baseFolder, projectFolder,
 	}
 
 	return r, nil
+}
+
+// Pull pulls (syncs) upstream changes into the local repo
+func (g gitRepoService) Pull() error {
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when pulling: %w", err)
+	}
+
+	//	Pull
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if err != nil {
+		return fmt.Errorf("problem pulling repository: %w", err)
+	}
+
+	return nil
+}
+
+// AddFile add the file to the repository
+func (g gitRepoService) AddFile(srcFile string) error {
+	//	Get just the filename we're trying to process:
+	_, currentFileName := filepath.Split(srcFile)
+
+	err := files.Copy(srcFile, path.Join(g.ProjectFolder, currentFileName), os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("problem copying file: %w", err)
+	}
+
+	// Get the working directory for the repository
+	w, err := g.Repository.Worktree()
+	if err != nil {
+		return fmt.Errorf("problem getting working tree when adding: %w", err)
+	}
+
+	//	Add the file
+	_, err = w.Add(srcFile)
+	if err != nil {
+		return fmt.Errorf("problem adding the file: %w", err)
+	}
+
+	return nil
+}
+
+func (g gitRepoService) CommitAndPush() error {
+	//TODO implement me
+	panic("implement me")
 }
