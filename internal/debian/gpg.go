@@ -24,8 +24,11 @@ func InitGPGKey(ctx context.Context, gpgKey, gpgPassword string) error {
 		cmd := fmt.Sprintf("echo -n \"%s\" | base64 --decode | gpg --batch --no-tty --passphrase %s --import", gpgKey, gpgPassword)
 		_, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
-			return fmt.Errorf("problem running gpg command: %w", err)
+			log.Err(err).Msg("problem running gpg command")
 		}
+
+		gpgResponse, _ := gpgCommand.Output()
+		log.Info().Str("response", string(gpgResponse)).Msg("GPG key list")
 	}
 
 	return nil
