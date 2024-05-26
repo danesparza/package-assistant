@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/package-assistant/api"
 	_ "github.com/danesparza/package-assistant/docs" // swagger docs location
+	"github.com/danesparza/package-assistant/internal/debian"
 	"github.com/danesparza/package-assistant/internal/repo"
 	"github.com/danesparza/package-assistant/internal/telemetry"
 	"github.com/go-chi/chi/v5"
@@ -71,6 +72,15 @@ func start(cmd *cobra.Command, args []string) {
 	)
 	if err != nil {
 		log.Err(err).Msg("problem initializing git repo")
+		return
+	}
+
+	err = debian.InitGPGKey(ctx,
+		viper.GetString("gpg.key"),
+		viper.GetString("gpg.password"),
+	)
+	if err != nil {
+		log.Err(err).Msg("problem initializing gpg key")
 		return
 	}
 
