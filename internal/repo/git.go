@@ -25,7 +25,7 @@ type GitRepoService interface {
 	Pull() error
 	AddFile(srcFile string) error
 	AddAll() error
-	CommitAndPush() error
+	CommitAndPush(username, password string) error
 }
 
 func NewGitRepoService(projectURL, projectFolder string, gitrepo *git.Repository) GitRepoService {
@@ -36,8 +36,7 @@ func NewGitRepoService(projectURL, projectFolder string, gitrepo *git.Repository
 	}
 }
 
-// InitPackageRepo makes sure that the package repo project folder is ready to use
-// and that the git credential helper is set up and ready to use
+// InitPackageRepo makes sure that the package repo project folder is ready to use with the git credentials
 func InitPackageRepo(ctx context.Context, projectUrl, projectFolder, username, password string) (*git.Repository, error) {
 	log.Info().Msg("Initializing package repo...")
 	_, err := os.Stat(projectFolder)
@@ -137,7 +136,7 @@ func (g gitRepoService) AddAll() error {
 }
 
 // CommitAndPush commits the changes and pushes to the remote
-func (g gitRepoService) CommitAndPush() error {
+func (g gitRepoService) CommitAndPush(username, password string) error {
 	// Get the working directory for the repository
 	w, err := g.Repository.Worktree()
 	if err != nil {
@@ -161,7 +160,13 @@ func (g gitRepoService) CommitAndPush() error {
 	}
 
 	//	Push
-	err = g.Repository.Push(&git.PushOptions{})
+	err = g.Repository.Push(&git.PushOptions{
+		Auth: &http.BasicAuth{
+			Username: username,
+			Password: password,
+		},
+		Progress: os.Stdout,
+	})
 	if err != nil {
 		return fmt.Errorf("problem pushing: %w", err)
 	}
