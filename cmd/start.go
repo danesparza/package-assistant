@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -102,6 +103,10 @@ func start(cmd *cobra.Command, args []string) {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
 	r.Use(telemetry.Middleware(telemetry.NRApp))
+	r.Use(middleware.BasicAuth("restricted", map[string]string{
+		viper.GetString("auth.user"): viper.GetString("auth.token"),
+	}))
+	r.Use(httprate.LimitByIP(1, 1*time.Second)) // Rate limit to 1 call per second (per IP)
 	r.Use(api.ApiVersionMiddleware)
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
