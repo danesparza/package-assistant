@@ -103,9 +103,6 @@ func start(cmd *cobra.Command, args []string) {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
 	r.Use(telemetry.Middleware(telemetry.NRApp))
-	r.Use(middleware.BasicAuth("restricted", map[string]string{
-		viper.GetString("auth.user"): viper.GetString("auth.token"),
-	}))
 	r.Use(httprate.LimitByIP(1, 1*time.Second)) // Rate limit to 1 call per second (per IP)
 	r.Use(api.ApiVersionMiddleware)
 	r.Use(cors.Handler(cors.Options{

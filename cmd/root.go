@@ -79,7 +79,6 @@ func initConfig() {
 	viper.SetDefault("git.email", "some@changethis.com")
 	viper.SetDefault("gpg.key", "some key")
 	viper.SetDefault("gpg.password", "some password")
-	viper.SetDefault("auth.user", "pauth")
 	viper.SetDefault("auth.token", "some_token")
 
 	// If a config file is found, read it in

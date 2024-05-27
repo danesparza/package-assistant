@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 // UploadPackage godoc
@@ -26,6 +27,14 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
 	UploadPath := viper.GetString("upload.path")
+
+	//	First check the auth token and make sure it exists on the header:
+	authToken := req.Header.Get("X-PackAuth")
+	if strings.TrimSpace(authToken) != strings.TrimSpace(viper.GetString("auth.token")) {
+		err := fmt.Errorf("X-PackAuth token invalid")
+		sendErrorResponse(rw, err, http.StatusUnauthorized)
+		return
+	}
 
 	//	First check for maximum uplooad size and return an error if we exceed it.
 	req.Body = http.MaxBytesReader(rw, req.Body, MAX_UPLOAD_SIZE)
