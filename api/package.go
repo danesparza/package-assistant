@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/danesparza/package-assistant/internal/debian"
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
@@ -25,8 +26,15 @@ import (
 // @Router /package [post]
 func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) {
 
+	//	Get configs
 	MAX_UPLOAD_SIZE := viper.GetInt64("upload.bytelimit")
 	UploadPath := viper.GetString("upload.path")
+	RepoPath := viper.GetString("github.projectfolder")
+	gpgPassword := viper.GetString("gpg.password")
+	gitName := viper.GetString("git.name")
+	gitEmail := viper.GetString("git.email")
+	githubUser := viper.GetString("github.user")
+	githubPassword := viper.GetString("github.password")
 
 	//	First check the auth token and make sure it exists on the header:
 	authToken := req.Header.Get("X-PackAuth")
@@ -86,12 +94,44 @@ func (service Service) UploadPackage(rw http.ResponseWriter, req *http.Request) 
 	//	Process the file
 
 	//	ci-pre.sh (switch to repo folder and git pull)
+	err = service.RepoSvc.Pull()
+	if err != nil {
+		err = fmt.Errorf("error refreshing repo: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
-	//	Copy file to repo folder
+	//	Move file to repo folder
+	repoFile := path.Join(RepoPath, fileHeader.Filename)
+	err = os.Rename(destinationFile, repoFile)
+	if err != nil {
+		err = fmt.Errorf("error moving file to repo: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	//  ci-refresh.sh / refresh-packages.sh (Perform dpkg-scanpackages, gzip and sign using gpg)
+	err = debian.RefreshPackages(req.Context(), gpgPassword, gitEmail, RepoPath)
+	if err != nil {
+		err = fmt.Errorf("error refreshing packages: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	//	ci-post.sh (git add / git commit / git push)
+	err = service.RepoSvc.AddAll()
+	if err != nil {
+		err = fmt.Errorf("error adding changes in repo: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
+
+	err = service.RepoSvc.CommitAndPush(githubUser, githubPassword, gitName, gitEmail)
+	if err != nil {
+		err = fmt.Errorf("error committing and pushing: %w", err)
+		sendErrorResponse(rw, err, http.StatusInternalServerError)
+		return
+	}
 
 	//	If we've gotten this far, indicate a successful upload
 	response := SystemResponse{

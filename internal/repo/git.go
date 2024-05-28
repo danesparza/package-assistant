@@ -8,7 +8,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 	"os"
 	"path"
 	"path/filepath"
@@ -25,7 +24,7 @@ type GitRepoService interface {
 	Pull() error
 	AddFile(srcFile string) error
 	AddAll() error
-	CommitAndPush(username, password string) error
+	CommitAndPush(username, password, gitName, gitEmail string) error
 }
 
 func NewGitRepoService(projectURL, projectFolder string, gitrepo *git.Repository) GitRepoService {
@@ -136,16 +135,12 @@ func (g gitRepoService) AddAll() error {
 }
 
 // CommitAndPush commits the changes and pushes to the remote
-func (g gitRepoService) CommitAndPush(username, password string) error {
+func (g gitRepoService) CommitAndPush(username, password, gitName, gitEmail string) error {
 	// Get the working directory for the repository
 	w, err := g.Repository.Worktree()
 	if err != nil {
 		return fmt.Errorf("problem getting working tree when committing: %w", err)
 	}
-
-	//	Get the name / email from config (or environment)
-	gitName := viper.GetString("git.name")
-	gitEmail := viper.GetString("git.email")
 
 	//	Commit the file(s)
 	_, err = w.Commit("package repo bot commit", &git.CommitOptions{
