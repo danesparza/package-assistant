@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/danesparza/package-assistant/internal/files"
 	"github.com/go-git/go-git/v5"
@@ -83,6 +84,10 @@ func (g gitRepoService) Pull() error {
 
 	//	Pull
 	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return nil // Get out.  This is fine and we're done.
+	}
+
 	if err != nil {
 		return fmt.Errorf("problem pulling repository: %w", err)
 	}

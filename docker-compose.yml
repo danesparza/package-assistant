@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   package-repo:
-    image: danesparza/package-assistant:1.1.28
+    image: danesparza/package-assistant:1.1.30
     container_name: package-assist
     tty: true
     restart: unless-stopped
