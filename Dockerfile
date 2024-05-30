@@ -34,7 +34,7 @@ FROM ubuntu:23.10
 
 # Specialized tools for package-repo
 RUN apt update
-RUN apt upgrade
+RUN apt upgrade -y
 RUN apt install -y git gnupg dpkg-dev apt-utils nano
 
 WORKDIR /root/
