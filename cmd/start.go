@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/danesparza/package-assistant/api"
 	_ "github.com/danesparza/package-assistant/docs" // swagger docs location
+	"github.com/danesparza/package-assistant/internal/cache"
 	"github.com/danesparza/package-assistant/internal/debian"
 	"github.com/danesparza/package-assistant/internal/monitor"
 	"github.com/danesparza/package-assistant/internal/repo"
@@ -91,6 +92,13 @@ func start(cmd *cobra.Command, args []string) {
 		viper.GetString("github.projectfolder"),
 		gitRepo)
 
+	//	Create a connection to Redis:
+	rdb, err := cache.NewManager()
+	if err != nil {
+		log.Err(err).Msg("Failed to connect to cache")
+		return
+	}
+
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
@@ -102,7 +110,7 @@ func start(cmd *cobra.Command, args []string) {
 		StartTime: time.Now(),
 		RepoSvc:   repoSvc,
 	}
-	go monitorService.DiscardOldFileVersions(ctx)
+	go monitorService.DiscardOldFileVersions(ctx, rdb)
 
 	//	Create a router and set up our REST endpoints...
 	r := chi.NewRouter()
