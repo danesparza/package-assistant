@@ -6,6 +6,7 @@ import (
 	"github.com/danesparza/package-assistant/api"
 	_ "github.com/danesparza/package-assistant/docs" // swagger docs location
 	"github.com/danesparza/package-assistant/internal/debian"
+	"github.com/danesparza/package-assistant/internal/monitor"
 	"github.com/danesparza/package-assistant/internal/repo"
 	"github.com/danesparza/package-assistant/internal/telemetry"
 	"github.com/go-chi/chi/v5"
@@ -85,14 +86,23 @@ func start(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	repoSvc := repo.NewGitRepoService(
+		viper.GetString("github.projecturl"),
+		viper.GetString("github.projectfolder"),
+		gitRepo)
+
 	//	Create an api service object
 	apiService := api.Service{
 		StartTime: time.Now(),
-		RepoSvc: repo.NewGitRepoService(
-			viper.GetString("github.projecturl"),
-			viper.GetString("github.projectfolder"),
-			gitRepo),
+		RepoSvc:   repoSvc,
 	}
+
+	//	Create the background monitor service and start it
+	monitorService := monitor.Service{
+		StartTime: time.Now(),
+		RepoSvc:   repoSvc,
+	}
+	go monitorService.DiscardOldFileVersions(ctx)
 
 	//	Create a router and set up our REST endpoints...
 	r := chi.NewRouter()
