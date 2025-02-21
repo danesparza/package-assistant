@@ -1,10 +1,12 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
 # Start from the latest golang base image
-FROM golang:1.22.2 as builder
+FROM golang:1.24.0 as builder
 
 ARG packagePath
 ARG buildNum
 ARG circleSha
+ARG TARGETOS
+ARG TARGETARCH
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -21,16 +23,17 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Emit what we have
-RUN echo $packagePath
-RUN echo $buildNum
-RUN echo $circleSha
+# Emit debug info
+RUN echo "Building for OS: $TARGETOS, Arch: $TARGETARCH"
+RUN echo "Package Path: $packagePath"
+RUN echo "Build Number: $buildNum"
+RUN echo "Commit SHA: $circleSha"
 
-# Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-X ${packagePath}/version.BuildNumber=${buildNum} -X ${packagePath}/version.CommitID=${circleSha} -X '${packagePath}/version.Prerelease=-'" -installsuffix cgo -o main ./
+# Build the Go app for the correct architecture
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -a -ldflags "-X ${packagePath}/version.BuildNumber=${buildNum} -X ${packagePath}/version.CommitID=${circleSha} -X '${packagePath}/version.Prerelease=-'" -installsuffix cgo -o main ./
 
 ######## Start a new stage from scratch #######
-FROM ubuntu:23.10
+FROM --platform=$TARGETPLATFORM ubuntu:23.10
 
 # Specialized tools for package-repo
 RUN apt update
