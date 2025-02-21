@@ -33,7 +33,7 @@ RUN echo "Commit SHA: $circleSha"
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -a -ldflags "-X ${packagePath}/version.BuildNumber=${buildNum} -X ${packagePath}/version.CommitID=${circleSha} -X '${packagePath}/version.Prerelease=-'" -installsuffix cgo -o main ./
 
 ######## Start a new stage from scratch #######
-FROM --platform=$TARGETPLATFORM ubuntu:23.10
+FROM --platform=$TARGETPLATFORM ubuntu:24.04
 
 # Specialized tools for package-repo
 RUN apt update
